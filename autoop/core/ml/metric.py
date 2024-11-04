@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 # from typing import Any
 import numpy as np
 import sklearn.metrics as skl
-# test
+
 
 METRICS = [
     "mean_squared_error",
@@ -25,6 +25,8 @@ def get_metric(name: str, predictions: np.ndarray, ground_truth: np.ndarray):
         return MeanAbsoluteError(predictions, ground_truth)
     elif name == "recall":
         return Recall(predictions, ground_truth)
+    elif name == "rsquared":
+        return RSquared(predictions, ground_truth)
     else:
         raise ValueError(f"Metric '{name}' is not implemented.")
 
@@ -98,7 +100,8 @@ class AUC(Metric):
 
 class Recall(Metric):
     """
-    Returns the the proportion of actual positive cases correctly identified by the model
+    Returns the the proportion of actual positive cases correctly
+    identified by the model
     """
     def _init_(self, predictions: np.ndarray,
                ground_truth: np.ndarray) -> None:
@@ -155,6 +158,23 @@ class MeanAbsoluteError(Metric):
         return self.result
 
 
+class RSquared(Metric):
+    """
+    Measures how well the model's predictions approximate to actual data points
+    """
+    def _init_(self, predictions: np.ndarray,
+               ground_truth: np.ndarray) -> None:
+        super()._init_(predictions, ground_truth)
+        self.size = len(predictions)
+
+    def _call_(self):
+        self.result = 1 - (np.sum((self.ground_truth - self.predictions)*2)
+                           / np.sum((self.ground_truth -
+                                     np.mean(self.ground_truth))*2))
+
+        return self.result
+
+
 if __name__ == "_main_":
     predictions_c = np.array([1, 0, 0, 1, 1])
     labels_c = np.array([1, 1, 0, 1, 0])
@@ -168,9 +188,11 @@ if __name__ == "_main_":
 
     mse = get_metric("mse", predictions_r, labels_r)
     mae = get_metric("mae", predictions_r, labels_r)
+    rsquared = get_metric("rsquared", predictions_r, labels_r)
 
     print("Accuracy:", accuracy(), skl.accuracy_score(labels_c, predictions_c))
     print("MSE:", mse(), skl.mean_squared_error(labels_r, predictions_r))
     print("AUC:", auc(), skl.roc_auc_score(labels_c, predictions_c))
     print("MAE:", mae(), skl.mean_absolute_error(labels_r, predictions_r))
     print("Recall:", recall(), skl.recall_score(labels_c, predictions_c))
+    print("R Squared:", rsquared(), skl.r2_score(labels_r, predictions_r))
