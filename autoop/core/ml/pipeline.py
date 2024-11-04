@@ -74,11 +74,9 @@ Pipeline(
             "split": self._split,
         }
         artifacts.append(
-            Artifact(name="pipeline_config", data=pickle.dumps(pipeline_data))
-            )
+            Artifact(name="pipeline_config", data=pickle.dumps(pipeline_data)))
         artifacts.append(
-            self._model.to_artifact(name=f"pipeline_model_{self._model.type}")
-            )
+            self._model.to_artifact(name=f"pipeline_model_{self._model.type}"))
         return artifacts
 
     def _register_artifact(self, name: str, artifact):
@@ -106,10 +104,10 @@ Pipeline(
                          for vector in self._input_vectors]
         self._test_X = [vector[int(split * len(vector)):]
                         for vector in self._input_vectors]
-        self._train_y = self._output_vector[:int(split *
-                                                 len(self._output_vector))]
-        self._test_y = self._output_vector[int(split *
-                                               len(self._output_vector)):]
+        self._train_y = self._output_vector[:int(split
+                                                 * len(self._output_vector))]
+        self._test_y = self._output_vector[int(split
+                                               * len(self._output_vector)):]
 
     def _compact_vectors(self, vectors: List[np.array]) -> np.array:
         return np.concatenate(vectors, axis=1)
@@ -130,6 +128,9 @@ Pipeline(
         self._predictions = predictions
 
     def execute(self):
+        """""
+        This method executes the whole process
+        """""
         self._preprocess_features()
         self._split_data()
         self._train()
