@@ -168,7 +168,7 @@ class RSquared(Metric):
         super()._init_(predictions, ground_truth)
         self.size = len(predictions)
 
-    def _call_(self):
+    def _call_(self) -> float:
         diff = self.ground_truth - self.predictions
         mean_diff = self.ground_truth - np.mean(self.ground_truth)
         self.result = 1 - (np.sum(diff * 2) / np.sum(mean_diff * 2))

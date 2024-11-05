@@ -8,7 +8,7 @@ import streamlit as st
 st.set_page_config(page_title="Modelling", page_icon="📈")
 
 
-def write_helper_text(text: str):
+def write_helper_text(text: str) -> None:
     """
     A helper function that writes text
     """

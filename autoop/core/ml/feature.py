@@ -70,7 +70,7 @@ class Feature(BaseModel):
             else 'categorical'
         )
 
-    def set_values(self, dataset: Dataset):
+    def set_values(self, dataset: Dataset) -> None:
         """
         Sets the dataset and detects feature type.
 

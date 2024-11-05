@@ -32,14 +32,13 @@ class Pipeline:
         self._artifacts: Dict[str, Dict[str, Any]] = {}
         self._split = split
 
-        if (
-            target_feature.type == "categorical"
-            and model.type != "classification"
-        ):
+        if (target_feature.type == "categorical"
+                and model.type != "classification"):
             raise ValueError(
                 "Model type must be classification for"
                 " categorical target feature"
             )
+
         if target_feature.type == "continuous" and model.type != "regression":
             raise ValueError(
                 "Model type must be regression for continuous target feature"
@@ -84,7 +83,7 @@ Pipeline(
             "target_feature": self._target_feature,
             "split": self._split,
         }
-        artifacts.append(Artifact(name="pipeline_config", 
+        artifacts.append(Artifact(name="pipeline_config",
                                   data=pickle.dumps(pipeline_data)))
         artifacts.append(self._model.to_artifact
                          (name=f"pipeline_model_{self._model.type}"))
