@@ -10,7 +10,7 @@ class Dataset(Artifact):
     Represents a dataset artifact.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """
         Initializes a Dataset with type set to "dataset".
         """
@@ -18,7 +18,7 @@ class Dataset(Artifact):
 
     @staticmethod
     def from_dataframe(data: pd.DataFrame, name: str,
-                       asset_path: str, version: str = "1.0.0"):
+                       asset_path: str, version: str = "1.0.0") -> 'Dataset':
         """
         Creates a Dataset from a DataFrame.
 
