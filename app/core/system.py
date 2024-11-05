@@ -1,22 +1,31 @@
 from autoop.core.storage import LocalStorage
 from autoop.core.database import Database
-# from autoop.core.ml.dataset import Dataset
 from autoop.core.ml.artifact import Artifact
 from autoop.core.storage import Storage
 from typing import List
 
 
-class ArtifactRegistry():
-    def __init__(self,
-                 database: Database,
-                 storage: Storage):
+class ArtifactRegistry:
+    """
+    Manages artifact storage and retrieval.
+    """
+    def __init__(self, database: Database, storage: Storage):
+        """
+        Args:
+            database (Database): Stores artifact metadata.
+            storage (Storage): Stores artifact data.
+        """
         self._database = database
         self._storage = storage
 
     def register(self, artifact: Artifact):
-        # save the artifact in the storage
+        """
+        Saves artifact data and metadata.
+
+        Args:
+            artifact (Artifact): The artifact to register.
+        """
         self._storage.save(artifact.data, artifact.asset_path)
-        # save the metadata in the database
         entry = {
             "name": artifact.name,
             "version": artifact.version,
@@ -28,6 +37,15 @@ class ArtifactRegistry():
         self._database.set(f"artifacts/{artifact.id}", entry)
 
     def list(self, type: str = None) -> List[Artifact]:
+        """
+        Lists artifacts, optionally filtered by type.
+
+        Args:
+            type (str, optional): Type to filter by.
+
+        Returns:
+            List[Artifact]: Artifacts of the specified type.
+        """
         entries = self._database.list("artifacts")
         artifacts = []
         for id, data in entries:
@@ -46,6 +64,15 @@ class ArtifactRegistry():
         return artifacts
 
     def get(self, artifact_id: str) -> Artifact:
+        """
+        Retrieves an artifact by ID.
+
+        Args:
+            artifact_id (str): ID of the artifact.
+
+        Returns:
+            Artifact: The retrieved artifact.
+        """
         data = self._database.get("artifacts", artifact_id)
         return Artifact(
             name=data["name"],
@@ -58,21 +85,41 @@ class ArtifactRegistry():
         )
 
     def delete(self, artifact_id: str):
+        """
+        Deletes an artifact by ID.
+
+        Args:
+            artifact_id (str): ID of the artifact.
+        """
         data = self._database.get("artifacts", artifact_id)
         self._storage.delete(data["asset_path"])
         self._database.delete("artifacts", artifact_id)
 
 
 class AutoMLSystem:
+    """
+    Provides centralized access to artifact management.
+    """
     _instance = None
 
     def __init__(self, storage: LocalStorage, database: Database):
+        """
+        Args:
+            storage (LocalStorage): Storage for artifacts.
+            database (Database): Stores artifact metadata.
+        """
         self._storage = storage
         self._database = database
         self._registry = ArtifactRegistry(database, storage)
 
     @staticmethod
     def get_instance():
+        """
+        Returns the singleton instance of AutoMLSystem.
+
+        Returns:
+            AutoMLSystem: The singleton instance.
+        """
         if AutoMLSystem._instance is None:
             AutoMLSystem._instance = AutoMLSystem(
                 LocalStorage("./assets/objects"),
@@ -85,4 +132,10 @@ class AutoMLSystem:
 
     @property
     def registry(self):
+        """
+        Accesses the artifact registry.
+
+        Returns:
+            ArtifactRegistry: The artifact registry.
+        """
         return self._registry
