@@ -32,8 +32,8 @@ class Pipeline:
         self._artifacts: Dict[str, Dict[str, Any]] = {}
         self._split = split
 
-        if (target_feature.type == "categorical"
-                and model.type != "classification"):
+        if (target_feature.type == "categorical" and
+                model.type != "classification"):
             raise ValueError(
                 "Model type must be classification for"
                 " categorical target feature"
