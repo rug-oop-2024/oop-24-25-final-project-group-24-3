@@ -4,4 +4,7 @@ from pydantic import BaseModel  # Field
 
 
 class Artifact(BaseModel):
+    """
+    Docstring for artifact
+    """
     pass

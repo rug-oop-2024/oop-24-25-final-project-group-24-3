@@ -136,7 +136,7 @@ class MeanSquaredError(Metric):
     def _call_(self) -> float:
         self.result = np.sum(
             (self.predictions - self.ground_truth)**2
-        )/self.size
+        ) / self.size
 
         return self.result
 
@@ -153,7 +153,7 @@ class MeanAbsoluteError(Metric):
     def _call_(self) -> float:
         self.result = np.sum(
             np.abs(self.predictions - self.ground_truth)
-        )/self.size
+        ) / self.size
 
         return self.result
 
@@ -168,9 +168,9 @@ class RSquared(Metric):
         self.size = len(predictions)
 
     def _call_(self):
-        self.result = 1 - (np.sum((self.ground_truth - self.predictions)*2)
-                           / np.sum((self.ground_truth -
-                                     np.mean(self.ground_truth))*2))
+        self.result = 1 - (np.sum((self.ground_truth - self.predictions) * 2)
+                           / np.sum(
+                        (self.ground_truth - np.mean(self.ground_truth)) * 2))
 
         return self.result
 
