@@ -2,6 +2,10 @@
 from autoop.core.ml.model.model import Model
 # from autoop.core.ml.model.regression import MultipleLinearRegression
 
+"""
+Docstring
+"""
+
 REGRESSION_MODELS = [
 ]  # add your models as str here
 

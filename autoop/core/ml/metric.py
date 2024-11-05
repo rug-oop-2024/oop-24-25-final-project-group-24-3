@@ -58,7 +58,7 @@ class Accuracy(Metric):
         self.size = len(predictions)
 
     def _call_(self) -> float:
-        self.result = np.sum(self.predictions == self.ground_truth)/self.size
+        self.result = np.sum(self.predictions == self.ground_truth) / self.size
 
         return self.result
 
@@ -168,10 +168,9 @@ class RSquared(Metric):
         self.size = len(predictions)
 
     def _call_(self):
-        self.result = 1 - (np.sum((self.ground_truth - self.predictions) * 2)
-                           / np.sum(
-                        (self.ground_truth - np.mean(self.ground_truth)) * 2))
-
+        diff = self.ground_truth - self.predictions
+        mean_diff = self.ground_truth - np.mean(self.ground_truth)
+        self.result = 1 - (np.sum(diff * 2) / np.sum(mean_diff * 2))
         return self.result
 
 
