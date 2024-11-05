@@ -10,7 +10,8 @@ METRICS = [
 ]  # add the names (in strings) of the metrics you implement
 
 
-def get_metric(name: str, predictions: np.ndarray, ground_truth: np.ndarray):
+def get_metric(name: str, predictions: np.ndarray,
+               ground_truth: np.ndarray) -> 'Metric':
     """
     Factory function to get a metric by name.
     Return a metric instance given its str name.
@@ -36,15 +37,15 @@ class Metric(ABC):
     Base class for all metrics.
     """
 
-    def _init_(self, predictions: np.ndarray, ground_truth: np.ndarray)\
-            -> float:
+    def _init_(self, predictions: np.ndarray,
+               ground_truth: np.ndarray) -> None:
         self.predictions = predictions
         self.ground_truth = ground_truth
         self.size = len(predictions)
         self.result = None
 
     @abstractmethod
-    def _call_(self):
+    def _call_(self) -> float:
         pass
 
 
