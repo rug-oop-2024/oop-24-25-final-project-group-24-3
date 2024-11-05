@@ -16,9 +16,9 @@ class NotFoundError(Exception):
 
 
 class Storage(ABC):
-    """""
+    """
     Class that loads, saves, delets, or lists all paths
-    """""
+    """
     @abstractmethod
     def save(self, data: bytes, path: str):
         """
