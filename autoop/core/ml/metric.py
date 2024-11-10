@@ -163,7 +163,7 @@ class RSquared(Metric):
         """
         total_variance = np.sum((self.ground_truth - np.mean(
             self.ground_truth)) ** 2)
-        explained_variance = np.sum((self.predictions - self.ground_truth)
-                                    ** 2)
+        explained_variance = np.sum(
+            (self.predictions - self.ground_truth) ** 2)
         self.result = 1 - (explained_variance / total_variance)
         return self.result

@@ -64,8 +64,7 @@ def display_pipeline_summary():
             "Random Forest", "Random Forest Regressor"
         ]:
             summary += (
-                f" - Number of Estimators: {st.session_state.n_estimators}\n"
-                )
+                f" - Number of Estimators: {st.session_state.n_estimators}\n")
             summary += f" - Max Depth: {st.session_state.max_depth}\n"
         elif st.session_state.selected_model in ["SVM", "SVR"]:
             summary += f" - Kernel: {st.session_state.kernel}\n"
@@ -131,10 +130,9 @@ if datasets:
         st.warning("Please select a target feature.")
 
     if input_features and target_feature:
-        if (
-            data_df[target_feature].dtype == "object"
-            or len(data_df[target_feature].unique()) < 20
-        ):
+        is_categorical = data_df[target_feature].dtype == "object"
+        is_small_unique_values = len(data_df[target_feature].unique()) < 20
+        if is_categorical or is_small_unique_values:
             task_type = "Classification"
         else:
             task_type = "Regression"
@@ -232,10 +230,10 @@ if datasets:
                     st.session_state.selected_metrics = metrics
                     st.write(f"Selected metrics: {', '.join(metrics)}")
 
-        if (
-            st.session_state.model_selected
-            and st.session_state.metrics_selected
-        ):
+        model_selected = st.session_state.model_selected
+        metrics_selected = st.session_state.metrics_selected
+
+        if model_selected and metrics_selected:
             if st.button("Show Pipeline Summary"):
                 st.empty()
                 display_pipeline_summary()
