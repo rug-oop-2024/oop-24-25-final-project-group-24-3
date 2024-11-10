@@ -25,6 +25,8 @@ class ArtifactRegistry:
         Args:
             artifact (Artifact): The artifact to register.
         """
+        artifact_id = artifact.id() if callable(
+            getattr(artifact, 'id', None)) else artifact.id
         self._storage.save(artifact.data, artifact.asset_path)
         entry = {
             "name": artifact.name,
@@ -34,7 +36,7 @@ class ArtifactRegistry:
             "metadata": artifact.metadata,
             "type": artifact.type,
         }
-        self._database.set(f"artifacts/{artifact.id}", entry)
+        self._database.set("artifacts", artifact_id, entry)
 
     def list(self, type: str = None) -> List[Artifact]:
         """

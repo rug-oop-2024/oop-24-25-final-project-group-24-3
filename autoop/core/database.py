@@ -1,4 +1,3 @@
-
 import json
 from typing import Tuple, List, Union
 from autoop.core.storage import Storage
@@ -86,7 +85,6 @@ class Database():
                 self._storage.save(json.dumps(item).encode(),
                                    f"{collection}/{id}")
 
-        # for things that were deleted, we need to remove them from the storage
         keys = self._storage.list("")
         for key in keys:
             collection, id = key.split("/")[-2:]
@@ -97,9 +95,13 @@ class Database():
         """Load the data from storage"""
         self._data = {}
         for key in self._storage.list(""):
+            key = key.replace("\\", "/")
             collection, id = key.split("/")[-2:]
-            data = self._storage.load(f"{collection}/{id}")
-            # Ensure the collection exists in the dictionary
-            if collection not in self._data:
-                self._data[collection] = {}
-            self._data[collection][id] = json.loads(data.decode())
+
+            try:
+                data = self._storage.load(f"{collection}/{id}")
+                if collection not in self._data:
+                    self._data[collection] = {}
+                self._data[collection][id] = json.loads(data.decode())
+            except Exception as e:
+                print(f"Error loading data from {key}: {e}")

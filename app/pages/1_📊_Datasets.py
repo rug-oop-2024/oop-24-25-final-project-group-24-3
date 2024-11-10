@@ -1,62 +1,61 @@
 import streamlit as st
 import pandas as pd
-
 from app.core.system import AutoMLSystem
 from autoop.core.ml.dataset import Dataset
+from pathlib import Path
+import io
 
 automl = AutoMLSystem.get_instance()
 
-st.set_page_config(
-    page_title="Manage Datasets",
-    page_icon="📊",
-    )
-
-st.title("Dataset Management")
-
+st.header("Available Datasets")
 datasets = automl.registry.list(type="dataset")
-
 if datasets:
-    dataset_info = []
-
     for dataset in datasets:
-        if isinstance(dataset, Dataset):
-            data = dataset.data
-            columns = dataset.columns
-        else:
-            data = getattr(dataset, 'data', None)
-            columns = getattr(dataset, 'columns', None)
+        st.subheader(f"{dataset.name} (Version: {dataset.version})")
 
-        dataset_info.append({
-            "Name": dataset.name,
-            "Type": dataset.type,
-            "Size (rows)":
-                len(dataset.data) if data is not None else "Unknown",
-            "Columns": ", ".join(columns) if columns is not None else "Unknown"
-        })
+        if f"show_{dataset.name}" not in st.session_state:
+            st.session_state[f"show_{dataset.name}"] = False
 
-    df = pd.DataFrame(dataset_info)
-    st.dataframe(df)
+        if st.button(f"Show/Hide Dataset: {dataset.name}"):
+            st.session_state[
+                f"show_{dataset.name}"] = not st.session_state[
+                    f"show_{dataset.name}"]
 
-choose_dataset = st.selectbox("Select a dataset to see the details",
-                              df['Name'])
+        if st.session_state[f"show_{dataset.name}"]:
+            data_bytes = dataset.read()
+            data_str = data_bytes.decode()
+            data_io = io.StringIO(data_str)
+            data_df = pd.read_csv(data_io)
 
-if choose_dataset:
-    st.subheader(f"Details for {choose_dataset}")
-    dataset_object = next(
-        (dataset for dataset in datasets if dataset.name == choose_dataset),
-        None)
+            st.write("Dataset Preview:")
+            st.dataframe(data_df)
+else:
+    st.write("No datasets available.")
 
-    if dataset_object:
-        st.write("Columns:")
-        st.write(dataset_object.columns)
-        st.write("Preview")
-        st.write(pd.DataFrame(dataset_object.data).head())
+st.header("Upload and Save New Dataset")
+uploaded_file = st.file_uploader("Choose a CSV file (Note: other "
+                                 "file types are not allowed)", type="csv")
 
-if hasattr(dataset_object, 'data'):
-    csv = pd.DataFrame(dataset_object.data).to_csv(index=False)
-    st.download_button(
-        label="Download dataset",
-        data=csv,
-        file_name=f"{choose_dataset}.csv",
-        mime='text/csv',
-    )
+if uploaded_file is not None:
+    data = pd.read_csv(uploaded_file)
+    st.write("Uploaded Dataset Preview:")
+    st.write(data)
+
+    dataset_name = st.text_input("Enter a name for the dataset:")
+    version = st.text_input("Version", value="1.0.0")
+
+    if st.button("Save Dataset") and dataset_name:
+        artifact_base_directory = Path("assets/dbo/artifacts")
+        artifact_directory = artifact_base_directory / dataset_name / version
+        artifact_directory.mkdir(parents=True, exist_ok=True)
+        artifact_path = artifact_directory / f"{dataset_name}.csv"
+
+        new_dataset = Dataset.from_dataframe(
+            data=data,
+            name=dataset_name,
+            asset_path=str(artifact_path),
+            version=version
+        )
+
+        automl.registry.register(new_dataset)
+        st.success(f"Dataset '{dataset_name}' saved successfully.")
