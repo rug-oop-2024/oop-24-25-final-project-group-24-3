@@ -3,6 +3,7 @@ import pandas as pd
 import io
 from app.core.system import AutoMLSystem
 
+
 st.set_page_config(page_title="Modelling", page_icon="📈")
 
 
@@ -227,15 +228,14 @@ if datasets:
                     st.write("Select evaluation metrics for classification:")
                     metrics = st.multiselect(
                         "Select metrics",
-                        ["Accuracy", "Precision", "Recall", "F1-Score",
-                         "AUC", "Confusion Matrix"]
+                        ["Accuracy", "AUC", "Recall"]
                     )
                 else:
                     st.write("Select evaluation metrics for regression:")
                     metrics = st.multiselect(
                         "Select metrics",
                         ["Mean Absolute Error", "Mean Squared Error",
-                         "R-squared", "Root Mean Squared Error"]
+                         "R-squared"]
                     )
 
                 if metrics:
