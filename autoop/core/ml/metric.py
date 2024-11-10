@@ -114,10 +114,12 @@ class Recall(Metric):
         Returns:
             float: The recall value.
         """
-        true_positives = np.sum((self.ground_truth == 1) &
-                                (self.predictions == 1))
-        false_negatives = np.sum((self.ground_truth == 1) &
-                                 (self.predictions == 0))
+        true_positives = np.sum(
+            (self.ground_truth == 1) & (self.predictions == 1)
+        )
+        false_negatives = np.sum(
+            (self.ground_truth == 1) & (self.predictions == 0)
+        )
         self.result = (true_positives / (true_positives + false_negatives)
                        if (true_positives + false_negatives) > 0 else 0.0)
         return self.result

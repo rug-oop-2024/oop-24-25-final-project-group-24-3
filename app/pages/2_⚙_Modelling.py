@@ -6,14 +6,27 @@ from app.core.system import AutoMLSystem
 st.set_page_config(page_title="Modelling", page_icon="📈")
 
 
-def write_helper_text(text: str):
+def write_helper_text(text: str) -> None:
+    """
+    Write helper text to the Streamlit app with custom HTML styling.
+
+    Args:
+        text (str): The text to be displayed in the Streamlit app.
+    """
     st.write(
         f"<p style=\"color: #888;\">{text}</p>",
         unsafe_allow_html=True
     )
 
 
-def display_pipeline_summary():
+def display_pipeline_summary() -> None:
+    """
+    Display a summary of the pipeline, including dataset, task type, model,
+    and selected hyperparameters.
+
+    This function fetches the session state to display information about the
+    dataset, task type, model, and evaluation metrics.
+    """
     dataset = st.session_state.get('dataset', 'Not Set')
     task_type = st.session_state.get('task_type', 'Not Set')
     model = st.session_state.get('selected_model', 'Not Set')

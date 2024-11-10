@@ -136,7 +136,7 @@ Pipeline(
 
         self._predictions = predictions
 
-    def _evaluate_train(self):
+    def _evaluate_train(self) -> None:
         """Evaluate the model on the training set."""
         X_train = self._compact_vectors(self._train_X)
         Y_train = self._train_y
