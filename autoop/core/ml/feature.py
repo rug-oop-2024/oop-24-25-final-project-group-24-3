@@ -6,8 +6,10 @@ from autoop.core.ml.dataset import Dataset
 
 
 class Feature(BaseModel):
-    """Represents a feature in a dataset with its type,
-    name, and other attributes."""
+    """
+    Represents a feature in a dataset with its type,
+    name, and other attributes.
+    """
     name: str = Field(..., description="The name of the feature")
     type: Literal["numerical", "categorical"] = Field(
         ..., description="The type of the feature"

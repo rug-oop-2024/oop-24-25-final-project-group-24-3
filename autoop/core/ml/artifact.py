@@ -4,8 +4,9 @@ import base64
 
 
 class Artifact(BaseModel):
-    """Represents an artifact with essential metadata and binary data."""
-
+    """
+    Represents an artifact with essential metadata and binary data.
+    """
     type: str = Field(...)
     name: str = Field(...)
     asset_path: str = Field(...)
@@ -15,7 +16,9 @@ class Artifact(BaseModel):
     metadata: dict[str, str] = Field(default_factory=dict)
 
     def __str__(self) -> str:
-        """Returns a JSON-like string representation of the artifact."""
+        """
+        Returns a JSON-like string representation of the artifact.
+        """
         return (
             f'{{"type": "{self.type}", "name": "{self.name}", '
             f'"asset_path": "{self.asset_path}", "version": "{self.version}"}}'

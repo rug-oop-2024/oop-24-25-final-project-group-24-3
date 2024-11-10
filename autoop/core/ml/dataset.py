@@ -2,7 +2,6 @@ from autoop.core.ml.artifact import Artifact
 # from abc import ABC, abstractmethod
 import pandas as pd
 import io
-# test
 
 
 class Dataset(Artifact):

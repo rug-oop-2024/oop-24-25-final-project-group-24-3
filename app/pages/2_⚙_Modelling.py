@@ -28,14 +28,6 @@ def display_pipeline_summary() -> None:
     This function fetches the session state to display information about the
     dataset, task type, model, and evaluation metrics.
     """
-    dataset = st.session_state.get('dataset', 'Not Set')
-    task_type = st.session_state.get('task_type', 'Not Set')
-    model = st.session_state.get('selected_model', 'Not Set')
-
-    st.write(f"Session state dataset: {dataset}")
-    st.write(f"Session state task_type: {task_type}")
-    st.write(f"Session state model: {model}")
-
     if 'solver' not in st.session_state:
         st.session_state.solver = "liblinear"
     if 'n_estimators' not in st.session_state:
@@ -67,23 +59,6 @@ def display_pipeline_summary() -> None:
         ### Model:
         **{st.session_state.selected_model}**
 
-        #### Hyperparameters:
-        """
-
-        if st.session_state.selected_model in [
-            "Logistic Regression", "Linear Regression"
-        ]:
-            summary += f" - Solver: {st.session_state.solver}\n"
-        elif st.session_state.selected_model in [
-            "Random Forest", "Random Forest Regressor"
-        ]:
-            summary += (
-                f" - Number of Estimators: {st.session_state.n_estimators}\n")
-            summary += f" - Max Depth: {st.session_state.max_depth}\n"
-        elif st.session_state.selected_model in ["SVM", "SVR"]:
-            summary += f" - Kernel: {st.session_state.kernel}\n"
-
-        summary += f"""
         ### Evaluation Metrics:
         - {', '.join(st.session_state.selected_metrics)}
         """
@@ -188,27 +163,30 @@ if datasets:
 
         if st.session_state.data_split:
             if not st.session_state.model_selected:
-                if st.button("Proceed to Model Selection"):
-                    if task_type == "Classification":
-                        st.write(
-                            "You selected a classification task. "
-                            "Choose a classification model:"
-                        )
-                        model_type = st.selectbox(
-                            "Select a model",
-                            ["Logistic Regression", "Random Forest", "SVM"]
-                        )
-                    else:
-                        st.write(
-                            "You selected a regression task. "
-                            "Choose a regression model:"
-                        )
-                        model_type = st.selectbox(
-                            "Select a model",
-                            ["Linear Regression",
-                             "Random Forest Regressor", "SVR"]
-                        )
+                st.write("### Model Selection")
+                if task_type == "Classification":
+                    st.write(
+                        "You selected a classification task. "
+                        "Choose a classification model:"
+                    )
+                    model_type = st.selectbox(
+                        "Select a model",
+                        ["Logistic Regression", "Random Forest", "SVM"],
+                        key="model_type"
+                    )
+                else:
+                    st.write(
+                        "You selected a regression task. "
+                        "Choose a regression model:"
+                    )
+                    model_type = st.selectbox(
+                        "Select a model",
+                        ["Linear Regression",
+                         "Random Forest Regressor", "SVR"],
+                        key="model_type"
+                    )
 
+                if st.button("Proceed to Model Selection"):
                     st.session_state.model_selected = True
                     st.session_state.selected_model = model_type
                     st.session_state.task_type = task_type
@@ -219,7 +197,6 @@ if datasets:
                         "version": selected_dataset.version
                     }
                     st.write(f"Selected model: {model_type}")
-
             else:
                 st.write(
                     f"### Model Selected: {st.session_state.selected_model}")

@@ -1,12 +1,13 @@
-from typing import List, Dict, Any, Union
+from typing import List, Any, Union
 import pickle
-import numpy as np
+
 from autoop.core.ml.artifact import Artifact
 from autoop.core.ml.dataset import Dataset
 from autoop.core.ml.model import Model
 from autoop.core.ml.feature import Feature
 from autoop.core.ml.metric import Metric
 from autoop.functional.preprocessing import preprocess_features
+import numpy as np
 
 
 class Pipeline:
@@ -29,7 +30,7 @@ class Pipeline:
         self._input_features = input_features
         self._target_feature = target_feature
         self._metrics = metrics
-        self._artifacts: Dict[str, Dict[str, Any]] = {}
+        self._artifacts: dict[str, dict[str, Any]] = {}
         self._split = split
 
         is_categorical = target_feature.type == "categorical"
@@ -91,7 +92,7 @@ Pipeline(
                          (name=f"pipeline_model_{self._model.type}"))
         return artifacts
 
-    def _register_artifact(self, name: str, artifact: Dict[str, Any]) -> None:
+    def _register_artifact(self, name: str, artifact: dict[str, Any]) -> None:
         self._artifacts[name] = artifact
 
     def _preprocess_features(self) -> None:
@@ -146,7 +147,7 @@ Pipeline(
             result = metric.evaluate(train_predictions, Y_train)
             self._train_metrics_results.append((metric, result))
 
-    def execute(self) -> Dict[str, Union[List[Any], np.array]]:
+    def execute(self) -> dict[str, Union[List[Any], np.array]]:
         """
         Executes the entire pipeline process including preprocessing,
         training, and evaluation, and returns metrics for both train

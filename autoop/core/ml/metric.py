@@ -50,7 +50,6 @@ class Metric(ABC):
     """
     Base class for all metrics.
     """
-
     def __init__(self, predictions: np.ndarray,
                  ground_truth: np.ndarray) -> None:
         """
