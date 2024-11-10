@@ -136,17 +136,30 @@ Pipeline(
 
         self._predictions = predictions
 
+    def _evaluate_train(self):
+        """Evaluate the model on the training set."""
+        X_train = self._compact_vectors(self._train_X)
+        Y_train = self._train_y
+        self._train_metrics_results = []
+        train_predictions = self._model.predict(X_train)
+        for metric in self._metrics:
+            result = metric.evaluate(train_predictions, Y_train)
+            self._train_metrics_results.append((metric, result))
+
     def execute(self) -> Dict[str, Union[List[Any], np.array]]:
         """
         Executes the entire pipeline process including preprocessing,
-        training, and evaluation.
+        training, and evaluation, and returns metrics for both train
+        and test sets.
         """
         self._preprocess_features()
         self._split_data()
         self._train()
+        self._evaluate_train()
         self._evaluate()
 
         return {
-            "metrics": self._metrics_results,
+            "train_metrics": self._train_metrics_results,
+            "test_metrics": self._metrics_results,
             "predictions": self._predictions,
         }

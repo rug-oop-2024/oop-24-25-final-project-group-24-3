@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-# from typing import Any
+from typing import Union
 import numpy as np
 import sklearn.metrics as skl
 
@@ -7,14 +7,28 @@ import sklearn.metrics as skl
 METRICS = [
     "mean_squared_error",
     "accuracy",
-]  # add the names (in strings) of the metrics you implement
+    "auc",
+    "mae",
+    "recall",
+    "rsquared",
+]
 
 
 def get_metric(name: str, predictions: np.ndarray,
                ground_truth: np.ndarray) -> 'Metric':
     """
-    Factory function to get a metric by name.
-    Return a metric instance given its str name.
+    Factory function to get a metric instance by name.
+
+    Args:
+        name (str): Name of the metric.
+        predictions (np.ndarray): Model predictions.
+        ground_truth (np.ndarray): Actual values.
+
+    Returns:
+        Metric: Instance of the requested metric class.
+
+    Raises:
+        ValueError: If the metric name is not recognized.
     """
     if name == "accuracy":
         return Accuracy(predictions, ground_truth)
@@ -37,162 +51,119 @@ class Metric(ABC):
     Base class for all metrics.
     """
 
-    def _init_(self, predictions: np.ndarray,
-               ground_truth: np.ndarray) -> None:
+    def __init__(self, predictions: np.ndarray,
+                 ground_truth: np.ndarray) -> None:
+        """
+        Initializes the Metric with predictions and ground truth.
+
+        Args:
+            predictions (np.ndarray): Model predictions.
+            ground_truth (np.ndarray): Actual values.
+        """
         self.predictions = predictions
         self.ground_truth = ground_truth
         self.size = len(predictions)
-        self.result = None
+        self.result: Union[float, None] = None
 
     @abstractmethod
-    def _call_(self) -> float:
+    def __call__(self) -> float:
+        """
+        Calculate the metric.
+
+        Returns:
+            float: The computed metric value.
+        """
         pass
 
 
 class Accuracy(Metric):
     """
-    Returns the accuracy of the model's predictions
+    Calculates the accuracy of the model's predictions.
     """
-    def _init_(self, predictions: np.ndarray, ground_truth: np.ndarray)\
-            -> None:
-        super()._init_(predictions, ground_truth)
-        self.size = len(predictions)
+    def __call__(self) -> float:
+        """Compute the accuracy score.
 
-    def _call_(self) -> float:
-        self.result = np.sum(self.predictions == self.ground_truth) / self.size
-
+        Returns:
+            float: The accuracy value.
+        """
+        self.result = np.mean(self.predictions == self.ground_truth)
         return self.result
 
 
 class AUC(Metric):
     """
-    Returns the model's classification performance
+    Calculates the Area Under the Curve (AUC) for classification.
     """
-    def _init_(self, predictions: np.ndarray, ground_truth: np.ndarray)\
-            -> None:
-        super()._init_(predictions, ground_truth)
-        self.size = len(predictions)
+    def __call__(self) -> float:
+        """Compute the AUC score.
 
-    def _call_(self) -> float:
-        data = np.column_stack((self.predictions, self.ground_truth))
-
-        # Calculate TPR and FPR
-        true_positives = 0
-        false_positives = 0
-        true_pos_rate = []
-        false_pos_rate = []
-        positives = np.sum(self.predictions)
-        negatives = len(self.ground_truth) - positives
-
-        for prediction, true in data:
-            if true == 1 and prediction == 1:  # True Positive
-                true_positives += 1
-            elif true == 0 and prediction == 1:  # False Positive
-                false_positives += 1
-
-            true_pos_rate.append(true_positives / positives)
-            false_pos_rate.append(false_positives / negatives)
-
-        # Calculate AUC using the trapezoidal rule
-        self.result = np.trapz(true_pos_rate, false_pos_rate)
-
+        Returns:
+            float: The AUC value.
+        """
+        self.result = skl.roc_auc_score(self.ground_truth, self.predictions)
         return self.result
 
 
 class Recall(Metric):
     """
-    Returns the the proportion of actual positive cases correctly
-    identified by the model
+    Calculates the recall score for classification.
     """
-    def _init_(self, predictions: np.ndarray,
-               ground_truth: np.ndarray) -> None:
-        super()._init_(predictions, ground_truth)
-        self.size = len(predictions)
+    def __call__(self) -> float:
+        """Compute the recall score.
 
-    def _call_(self) -> float:
-        data = np.column_stack((self.predictions, self.ground_truth))
-        true_positives = 0
-        false_negatives = 0
-
-        for prediction, true in data:
-            if true == 1 and prediction == 1:  # True Positive
-                true_positives += 1
-            elif true == 1 and prediction == 0:  # False Negative
-                false_negatives += 1
-
-        self.result = true_positives / (true_positives + false_negatives)
-
+        Returns:
+            float: The recall value.
+        """
+        true_positives = np.sum((self.ground_truth == 1) &
+                                (self.predictions == 1))
+        false_negatives = np.sum((self.ground_truth == 1) &
+                                 (self.predictions == 0))
+        self.result = (true_positives / (true_positives + false_negatives)
+                       if (true_positives + false_negatives) > 0 else 0.0)
         return self.result
 
 
 class MeanSquaredError(Metric):
     """
-    Returns the mean squared error of the model's predictions
+    Calculates the Mean Squared Error (MSE) for regression.
     """
-    def _init_(self, predictions: np.ndarray, ground_truth: np.ndarray)\
-            -> None:
-        super()._init_(predictions, ground_truth)
-        self.size = len(predictions)
+    def __call__(self) -> float:
+        """Compute the Mean Squared Error.
 
-    def _call_(self) -> float:
-        self.result = np.sum(
-            (self.predictions - self.ground_truth)**2
-        ) / self.size
-
+        Returns:
+            float: The MSE value.
+        """
+        self.result = np.mean((self.predictions - self.ground_truth) ** 2)
         return self.result
 
 
 class MeanAbsoluteError(Metric):
     """
-    Returns the mean absolute error of the model's predictions
+    Calculates the Mean Absolute Error (MAE) for regression.
     """
-    def _init_(self, predictions: np.ndarray, ground_truth: np.ndarray)\
-            -> None:
-        super()._init_(predictions, ground_truth)
-        self.size = len(predictions)
+    def __call__(self) -> float:
+        """Compute the Mean Absolute Error.
 
-    def _call_(self) -> float:
-        self.result = np.sum(
-            np.abs(self.predictions - self.ground_truth)
-        ) / self.size
-
+        Returns:
+            float: The MAE value.
+        """
+        self.result = np.mean(np.abs(self.predictions - self.ground_truth))
         return self.result
 
 
 class RSquared(Metric):
     """
-    Measures how well the model's predictions approximate to actual data points
+    Calculates the R-squared (coefficient of determination) for regression.
     """
-    def _init_(self, predictions: np.ndarray,
-               ground_truth: np.ndarray) -> None:
-        super()._init_(predictions, ground_truth)
-        self.size = len(predictions)
+    def __call__(self) -> float:
+        """Compute the R-squared score.
 
-    def _call_(self) -> float:
-        diff = self.ground_truth - self.predictions
-        mean_diff = self.ground_truth - np.mean(self.ground_truth)
-        self.result = 1 - (np.sum(diff * 2) / np.sum(mean_diff * 2))
+        Returns:
+            float: The R-squared value.
+        """
+        total_variance = np.sum((self.ground_truth - np.mean(
+            self.ground_truth)) ** 2)
+        explained_variance = np.sum((self.predictions - self.ground_truth)
+                                    ** 2)
+        self.result = 1 - (explained_variance / total_variance)
         return self.result
-
-
-if __name__ == "_main_":
-    predictions_c = np.array([1, 0, 0, 1, 1])
-    labels_c = np.array([1, 1, 0, 1, 0])
-
-    predictions_r = np.array([1, 4, 5, 6, 3, 4])
-    labels_r = np.array([1, 4, 2, 5, 3, 6])
-
-    accuracy = get_metric("accuracy", predictions_c, labels_c)
-    auc = get_metric("auc", predictions_c, labels_c)
-    recall = get_metric("recall", predictions_c, labels_c)
-
-    mse = get_metric("mse", predictions_r, labels_r)
-    mae = get_metric("mae", predictions_r, labels_r)
-    rsquared = get_metric("rsquared", predictions_r, labels_r)
-
-    print("Accuracy:", accuracy(), skl.accuracy_score(labels_c, predictions_c))
-    print("MSE:", mse(), skl.mean_squared_error(labels_r, predictions_r))
-    print("AUC:", auc(), skl.roc_auc_score(labels_c, predictions_c))
-    print("MAE:", mae(), skl.mean_absolute_error(labels_r, predictions_r))
-    print("Recall:", recall(), skl.recall_score(labels_c, predictions_c))
-    print("R Squared:", rsquared(), skl.r2_score(labels_r, predictions_r))
